@@ -1,0 +1,2 @@
+class AnalyticalException(Exception):
+    pass
