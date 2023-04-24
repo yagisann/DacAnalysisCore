@@ -1,5 +1,6 @@
 from .exceptions import AnalyticalException
 import numpy as np
+from itertools import zip_longest
 from .ddn import DictDotNotation as ddn
 
 
@@ -73,3 +74,26 @@ def get_range(values):
         "min": mn,
         "diff": mx-mn
     })
+
+
+def export_to(path, exp_dict):
+    e = []
+    for name, inst in exp_dict.items():
+        if inst.exp_type == "Absorption":
+            e.append(["Absorption", name])
+            e.append(["time / min"]+inst.processed.elapsed.data)
+            e.append(["Removal Efficiency / %"]+inst.result.co2_removal_eff)
+            e.append(["CO2 Concentration / %"]+inst.processed.gas_conc.downstream.data)
+            e.append([""])
+        else:
+            e.append(["Desorption", name])
+            e.append(["time / min"]+inst.processed.elapsed.data)
+            e.append(["CO2 Concentration / %"]+inst.processed.gas_conc.downstream.data)
+            e.append([""])
+    export_string = ""
+    for l in zip_longest(*e, fillvalue=""):
+        j = ",".join([str(m) for m in l])+"\n"
+        export_string += j
+    with open(path, "w") as f:
+        f.write(export_string)
+

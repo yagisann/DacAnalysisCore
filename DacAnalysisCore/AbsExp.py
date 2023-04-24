@@ -50,6 +50,7 @@ class CO2AbsExp:
         returns:
         - None
         """
+        self.exp_type = "Absorption"
         self.original = ddn()
         self.processed = ddn()
         self.result = ddn()
@@ -84,7 +85,7 @@ class CO2AbsExp:
     def get_total_abs(self):
         if not self.calculated.abs:
             self.full_analyse()
-        return self.result.co2_absorbed.integral_co2_abs[-1]
+        return self.result.co2_absorbed.integral_co2_abs[-1]*1000
     
     
     """ data import section """
@@ -357,20 +358,17 @@ class CO2AbsExp:
         """
         if not self.calculated.re:
             self.calc_co2_re()
-        if max(self.result.co2_removal_eff) < 90:
-            self.result.retention = {"T90": 0}
-            return self
         for t, re in zip(self.processed.elapsed.data, self.result.co2_removal_eff):
             if re is None:
                 # None value handle
                 continue
             if re < 90:
                 self.result.retention = {"T90": t}
+                self.calculated.T90 = True
                 return self
             else:
                 continue
         self.result.retention = {"T90": None}
-        self.calculated.T90 = True
         return self
     
     def full_analyse(self):
@@ -378,7 +376,12 @@ class CO2AbsExp:
         self.calc_co2_abs()
         self.calc_retention_90()
         return self
+
+    def __add__(self, other):
+        return self.get_total_abs()+other.get_total_abs()
     
+    def __sub__(self, other):
+        return self.get_total_abs()-other.get_total_abs()
 
     """ export setting """
     """

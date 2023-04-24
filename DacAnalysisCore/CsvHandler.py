@@ -2,6 +2,7 @@ import os, datetime, time, csv, re
 from itertools import zip_longest
 from .ddn import DictDotNotation as ddn
 from .exceptions import *
+from .utils import get_range
 
 
 class InsightCsvHandler:
@@ -117,6 +118,7 @@ class InsightCsvHandler:
             probe_info.unit = re.findall("\(.+?\)", zipped[0])[0].replace("(", "").replace(")", "")
             probe_info.label = zipped[0]
             probe_info.value = [InsightCsvHandler.num_convert(j) for j in zipped[1:]]
+            probe_info.range = get_range(probe_info.value)
             probes.append(probe_info)
         return probes
     

@@ -19,6 +19,7 @@ class CO2DspExp:
         returns:
         - None
         """
+        self.exp_type = "Desorption"
         self.original = ddn()
         self.processed = ddn()
         self.result = ddn()
@@ -48,7 +49,7 @@ class CO2DspExp:
     def get_total_dsp(self):
         if not self.calculated.dsp:
             self.full_analyse()
-        return self.result.co2_desorbed.integral_co2_dsp[-1]
+        return self.result.co2_desorbed.integral_co2_dsp[-1]*1000
     
     
     """ data import section """
@@ -197,7 +198,7 @@ class CO2DspExp:
         self.processed = self.original.copy()
         for i in self.form_setting:
             if i.type == "normalize":
-                self._set_normalize(i.min_value, i.max_value, i.unit)
+                self._set_normalize(i.stream, i.min_value, i.max_value, i.unit)
             elif i.type == "interval_average":
                 self._set_interval_average(i.interval, i.unit)
         self.result.format_setting = deepcopy(self.form_setting)
@@ -324,6 +325,11 @@ class CO2DspExp:
         self.calc_co2_dsp()
         return self
     
+    def __add__(self, other):
+        return self.get_total_dsp()+other.get_total_dsp()
+    
+    def __sub__(self, other):
+        return self.get_total_dsp()-other.get_total_dsp()
 
     """ export setting """
     """
